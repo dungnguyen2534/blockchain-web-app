@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useTransactionContext } from "../context/useTransactionContext";
 import TransactionCard from "./TransactionCard";
-import Button from "./Button";
+import Button from "./ui/Button";
 
 export default function Transactions() {
   const {
@@ -11,9 +11,11 @@ export default function Transactions() {
     PAGE_SIZE,
     currentPage,
     setCurrentPage,
+    getCurrentTransactionsPage,
+    isLoadingTransactionsHistory,
+    isLoadingAccount,
+    currentAccount,
   } = useTransactionContext();
-
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (totalPages && currentPage >= totalPages) {
@@ -21,26 +23,27 @@ export default function Transactions() {
     }
 
     window.history.pushState(null, "", `?page=${currentPage}`);
-
-    (async () => {
-      const startIndex = (currentPage - 1) * PAGE_SIZE;
-      if (startIndex < 0) {
-        setIsLoading(true);
-        await getTransactionsPage(0, PAGE_SIZE);
-        setIsLoading(false);
-      } else {
-        setIsLoading(true);
-        await getTransactionsPage(startIndex, PAGE_SIZE);
-        setIsLoading(false);
-      }
-    })();
-  }, [currentPage, getTransactionsPage, totalPages, PAGE_SIZE, setCurrentPage]);
+    getCurrentTransactionsPage();
+  }, [
+    currentPage,
+    getTransactionsPage,
+    totalPages,
+    PAGE_SIZE,
+    setCurrentPage,
+    getCurrentTransactionsPage,
+  ]);
 
   return (
-    <div className="card card-border bg-base-200 h-[90dvh] md:h-full p-5 space-y-2">
-      <div className="card-title">Transactions history:</div>
+    <div className="card card-border bg-base-200 h-[95dvh] md:h-full p-5 space-y-2">
+      <div className="card-title">Global transaction history:</div>
 
-      {!isLoading ? (
+      {!isLoadingAccount &&
+        !currentAccount &&
+        !isLoadingTransactionsHistory && (
+          <div>- Please connect your account first.</div>
+        )}
+
+      {!isLoadingTransactionsHistory ? (
         <div className="flex flex-col gap-1 h-full overflow-y-auto">
           {transactions.map((transaction, i) => (
             <TransactionCard key={i} transaction={transaction} />
@@ -52,7 +55,8 @@ export default function Transactions() {
 
       <div className="grid grid-cols-2 gap-2">
         <Button
-          className=""
+          disabled={!currentAccount || currentPage === 1}
+          className="btn-secondary"
           onClick={() =>
             setCurrentPage((prev) => (prev === 1 ? prev : prev - 1))
           }
@@ -60,9 +64,11 @@ export default function Transactions() {
           Previous
         </Button>
         <Button
-          className=""
+          className="btn-secondary"
           onClick={() => setCurrentPage((prev) => prev + 1)}
-          disabled={totalPages === null || currentPage >= totalPages}
+          disabled={
+            !currentAccount || totalPages === null || currentPage >= totalPages
+          }
         >
           Next
         </Button>

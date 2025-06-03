@@ -1,6 +1,6 @@
 import { ChevronsRight } from "lucide-react";
 import type { Transaction } from "../types/types";
-import formatEthereumAddress from "../utils/utils";
+import Address from "./Address";
 
 interface TransactionCardProps {
   transaction: Transaction;
@@ -8,32 +8,14 @@ interface TransactionCardProps {
 
 export default function TransactionCard({ transaction }: TransactionCardProps) {
   return (
-    <div className="flex flex-col gap-1 card card-border py-2 px-3 bg-base-100">
+    <div className="flex flex-col gap-0.5 card card-border py-2 px-3 bg-base-100">
       <div className="flex gap-0.5 font-semibold">
-        <a
-          href={`https://sepolia.etherscan.io/address/${transaction.addressFrom}`}
-          target="_blank"
-          rel="noopenner noreferrer"
-          title="See this address info on Etherscan"
-        >
-          <span className="text-info hover:underline">
-            {formatEthereumAddress(transaction.addressFrom)}
-          </span>
-        </a>
+        <Address address={transaction.addressFrom} />
         <ChevronsRight size={16} className="mt-[0.3rem]" />
-        <a
-          href={`https://sepolia.etherscan.io/address/${transaction.addressTo}`}
-          target="_blank"
-          rel="noopenner noreferrer"
-          title="See this address info on Etherscan"
-        >
-          <span className="text-info hover:underline">
-            {formatEthereumAddress(transaction.addressTo)}
-          </span>
-        </a>
+        <Address address={transaction.addressTo} />
       </div>
 
-      <div className="flex justify-between">
+      <div className="flex flex-col sm:flex-row gap-0.5 justify-between">
         <div>
           Amount: <span className="font-semibold">{transaction.amount}</span>{" "}
           ETH

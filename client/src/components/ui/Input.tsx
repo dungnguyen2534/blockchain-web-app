@@ -15,7 +15,7 @@ export default function Input({
   return (
     <input
       name={name}
-      className={`input ${className}`}
+      className={`input [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none focus:outline-2 !outline-primary transition-all duration-75 ${className}`}
       onChange={(e) => handleChange(e, name)}
       value={value ?? ""}
       {...rest}

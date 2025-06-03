@@ -1,4 +1,4 @@
-export default function formatEthereumAddress(
+export function formatEthereumAddress(
   address: string,
   charsToShow: number = 4
 ): string {
@@ -11,3 +11,7 @@ export default function formatEthereumAddress(
 
   return `${prefix}...${suffix}`;
 }
+
+export const isValidEthereumAddress = (address: string): boolean => {
+  return /^0x[a-fA-F0-9]{40}$/.test(address);
+};

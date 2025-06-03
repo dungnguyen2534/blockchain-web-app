@@ -1,64 +1,72 @@
 import { useTransactionContext } from "../context/useTransactionContext";
-import formatEthereumAddress from "../utils/utils";
-import Button from "./Button";
-import Input from "./Input";
+import Input from "./ui/Input";
 import LoadingButton from "./LoadingButton";
+import { toast } from "sonner";
+import { isValidEthereumAddress } from "../utils/utils";
+
 export default function TransactionForm() {
   const {
-    connectWallet,
-    currentAccount,
     formData,
+    setFormData,
     sendTransaction,
     handleChange,
     isSending,
+    currentAccount,
   } = useTransactionContext();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const { addressTo, amount } = formData;
     if (!addressTo || !amount) return;
 
-    sendTransaction();
+    const numericAmount = parseFloat(amount);
+    if (
+      !isValidEthereumAddress(addressTo) ||
+      isNaN(numericAmount) ||
+      numericAmount <= 0
+    ) {
+      toast.warning("Please enter valid transaction data");
+      return;
+    }
+
+    await sendTransaction();
+    setFormData({
+      addressTo: "",
+      amount: "",
+    });
   };
 
   return (
-    <div className="space-y-3">
-      {!currentAccount ? (
-        <Button onClick={connectWallet}>Connect wallet</Button>
-      ) : (
-        <div className="card card-border p-5  bg-base-200">
-          <div>{formatEthereumAddress(currentAccount)}</div>
-        </div>
-      )}
-
-      <form
-        className="flex flex-col gap-2 [&>*]:w-full card card-border p-5 bg-base-200"
-        onSubmit={handleSubmit}
+    <form
+      className="flex flex-col gap-2 [&>*]:w-full card card-border p-5 bg-base-200"
+      onSubmit={handleSubmit}
+    >
+      <h1 className="card-title">Make a transaction:</h1>
+      <Input
+        placeholder="Receiver address"
+        name="addressTo"
+        value={formData.addressTo}
+        handleChange={handleChange}
+        disabled={!currentAccount}
+      />
+      <Input
+        placeholder="Amount"
+        name="amount"
+        type="number"
+        value={formData.amount}
+        handleChange={handleChange}
+        step={0.0001}
+        disabled={!currentAccount}
+      />
+      <LoadingButton
+        loading={isSending}
+        loadingText="Might take a while..."
+        className="btn-primary"
+        type="submit"
+        disabled={!currentAccount}
       >
-        <h1 className="card-title">Make a transaction:</h1>
-        <Input
-          placeholder="Address To"
-          name="addressTo"
-          value={formData.addressTo}
-          handleChange={handleChange}
-        />
-        <Input
-          placeholder="Amount"
-          name="amount"
-          type="number"
-          value={formData.amount}
-          handleChange={handleChange}
-          step={0.0001}
-        />
-        <LoadingButton
-          loading={isSending}
-          loadingText="Might take a while..."
-          className="btn-primary"
-          type="submit"
-        >
-          Send with MetaMask
-        </LoadingButton>
-      </form>
-    </div>
+        Send with MetaMask
+      </LoadingButton>
+    </form>
   );
 }

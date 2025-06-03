@@ -5,6 +5,7 @@ import type { MainFormDataType, Transaction } from "../types/types";
 
 interface TransactionContextType {
   connectWallet: () => Promise<void>;
+  isLoadingAccount: boolean;
   currentAccount: string;
   formData: MainFormDataType;
   setFormData: React.Dispatch<React.SetStateAction<MainFormDataType>>;
@@ -18,6 +19,13 @@ interface TransactionContextType {
   PAGE_SIZE: number;
   currentPage: number;
   setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
+  isLoadingTransactionsHistory: boolean;
+  getCurrentTransactionsPage: () => Promise<void>;
+  latestTransaction:
+    | (Transaction & {
+        hash: string;
+      })
+    | null;
 }
 
 export const TransactionContext = createContext<TransactionContextType | null>(

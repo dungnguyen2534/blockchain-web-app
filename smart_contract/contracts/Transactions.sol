@@ -15,12 +15,19 @@ contract Transactions {
 
     TransferStruct[] transactions;
 
-    function addToBlockChain(address payable receiver, uint amount) public {
-        transactionCount += 1;
-        transactions.push(TransferStruct(msg.sender, receiver, amount, block.timestamp));
+    function transferAndRecord(address payable receiver) public payable {
+        require(msg.value > 0, "Amount must be greater than zero to transfer");
 
-        emit Transfer(msg.sender, receiver, amount, block.timestamp);
+        (bool success, ) = receiver.call{value: msg.value}("");
+        require(success, "Failed to send Ether to receiver");
+
+        transactionCount += 1;
+        transactions.push(TransferStruct(msg.sender, receiver, msg.value, block.timestamp));
+
+        emit Transfer(msg.sender, receiver, msg.value, block.timestamp);
     }
+
+
     function getTransactionsPageAndTotalPages(uint256 startIndex, uint256 pageSize)
         public
         view
